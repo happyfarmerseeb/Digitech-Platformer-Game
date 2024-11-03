@@ -15,6 +15,13 @@ BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
+##Add button definitions:##
+button_xpos = 1000
+button_ypos = 120
+button_height = 50
+button_width = 150
+button_color = GREEN
+button_text = "Speed"
 
 ##Add ball (player) definitions:##
 ball_xpos = 200
@@ -28,10 +35,10 @@ ballvelocity = 10
 direction = "null"
 
 ##Add ground definitions:##
-ground_xpos = 300
-ground_ypos = 300
-ground_width = 100
-ground_height = 100
+ground_xpos = 100
+ground_ypos = 420
+ground_width = 1080
+ground_height = 200
 ground_color = BLACK
 
 
@@ -83,6 +90,12 @@ while running:
                 else:
                     ballychange -= ballvelocity
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if mouse_pos[0] > button_xpos and mouse_pos[1] > button_ypos and mouse_pos[0] < button_xpos+button_width and mouse_pos[1] < button_ypos+button_height:
+                ballvelocity = random.randint(1,100)
+
+
        #     elif (key_end == pygame.K_LEFT or pygame.K_RIGHT) and (key_input != pygame.K_LEFT or pygame.K_RIGHT):
         #        ballxchange == 0
          #   elif (key_end == pygame.K_UP or pygame.K_DOWN) and (key_input != pygame.K_UP or pygame.K_DOWN):
@@ -98,6 +111,9 @@ while running:
     screen.fill("#0230e4")
     pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
     ground = pygame.draw.rect(screen, ground_color, (ground_xpos, ground_ypos, ground_width, ground_height), 0, 0, 0) #ground
+    button = pygame.draw.rect(screen, button_color, (button_xpos, button_ypos, button_width, button_height), 0, 0, 0)
+    button_text = font.render(f"{button_text}", True, BLACK)
+    screen.blit(button_text, [button_xpos, button_ypos])
     # RENDER YOUR GAME HERE
 
 #Position-responsive ball position label:    ball_xpos-20(((screen_width/2)-ball_xpos)/abs((screen_width/2)-ball_xpos)),ball_ypos-20(((screen_height/2)-ball_ypos)/abs((screen_height/2)-ball_ypos))
@@ -117,14 +133,14 @@ while running:
             ball_ypos = screen_height-ball_height
 
 #ground collision logic:
-        if ball_xpos+ball_width > ground_xpos and ball_xpos+ball_width < ground_xpos+0.5*ground_width and ball_ypos > ground_ypos-ball_height and ball_ypos < ground_ypos + ground_height:
-            ball_xpos=ground_xpos-ball_width
-        if ball_ypos+ball_height > ground_ypos and ball_ypos+ball_height < ground_ypos+0.5*ground_height and ball_xpos > ground_xpos-ball_width and ball_xpos < ground_xpos + ground_width:
-            ball_ypos=ground_ypos-ball_height
-        if ball_xpos < ground_xpos+ground_width and ball_xpos > ground_xpos+0.5*ground_width and ball_ypos > ground_ypos-ball_height and ball_ypos < ground_ypos + ground_height:
-            ball_xpos=ground_xpos+ground_width
-        if ball_ypos < ground_ypos+ground_height and ball_ypos > ground_ypos+0.5*ground_height and ball_xpos > ground_xpos-ball_width and ball_xpos < ground_xpos + ground_width:
-            ball_ypos=ground_ypos+ground_height
+        if ball_xpos + ball_width > ground_xpos and ball_xpos + ball_width < ground_xpos + ball_width and ball_ypos > ground_ypos - ball_height and ball_ypos < ground_ypos + ground_height:
+            ball_xpos = ground_xpos - ball_width
+        if ball_ypos + ball_height > ground_ypos and ball_ypos + ball_height < ground_ypos + ball_height and ball_xpos > ground_xpos - ball_width and ball_xpos < ground_xpos + ground_width:
+            ball_ypos = ground_ypos - ball_height
+        if ball_xpos < ground_xpos + ground_width and ball_xpos > ground_xpos + ground_width - ball_width and ball_ypos > ground_ypos - ball_height and ball_ypos < ground_ypos + ground_height:
+            ball_xpos = ground_xpos + ground_width
+        if ball_ypos < ground_ypos + ground_height and ball_ypos > ground_ypos + ground_height - ball_height and ball_xpos > ground_xpos - ball_width and ball_xpos < ground_xpos + ground_width:
+            ball_ypos = ground_ypos + ground_height
         
         pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
     
