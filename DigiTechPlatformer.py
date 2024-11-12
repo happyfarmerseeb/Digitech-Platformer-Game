@@ -9,12 +9,16 @@ pygame.init()
 screen_width = 1280
 screen_height = 720
 font = pygame.font.SysFont("Calibri", 25)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+Red_A_Val = 1
+Green_A_Val = 1
+Blue_A_Val = 1
+RED = (255, 0, 0, Red_A_Val)
+GREEN = (0, 255, 0, Green_A_Val)
+BLUE = (0, 0, 255, Blue_A_Val)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 gravity = 0.42
+
 
 ##Add button definitions:##
 button_xpos = 1000
@@ -40,18 +44,30 @@ ball_x_velocity = 0
 ball_y_velocity = 0
 ball_grounded = False
 ball_acceleration = 0
+offset = 0
+ball_true_x_pos = 200
 
-#potentially obsoleted variables
-ball_jump_speed = 12
-ball_jump_frames = 0
+##Level 1##
+L1_Ground_Red_X = 50
+L1_Ground_Red_Y = 520
+L1_Ground_Red_W = 1080
+L1_Ground_Red_H = 200
 
+L1_Ground_Green_X = 1130
+L1_Ground_Green_Y = 520
+L1_Ground_Green_W = 1080
+L1_Ground_Green_H = 200
 
-direction = "null"
+L1_Ground_Blue_X = 2210
+L1_Ground_Blue_Y = 520
+L1_Ground_Blue_W = 1080
+L1_Ground_Blue_H = 200
+
 
 ##Add ground definitions:##
 ground_xpos = 100
 ground_ypos = 520
-ground_width = 1080
+ground_width = L1_Ground_Red_W + L1_Ground_Green_W + L1_Ground_Blue_W
 ground_height = 200
 ground_color = BLACK
 
@@ -95,6 +111,22 @@ while running:
             mouse_pos = pygame.mouse.get_pos()
             if mouse_pos[0] > button_xpos and mouse_pos[1] > button_ypos and mouse_pos[0] < button_xpos+button_width and mouse_pos[1] < button_ypos+button_height:
                 ball_max_x_velocity = random.randint(1,100)
+                L1_Ground_Red_X = random.randint(1,400)
+                L1_Ground_Red_Y = random.randint(1,300)
+                L1_Ground_Red_W = random.randint(1,500)
+                L1_Ground_Red_H = random.randint(1,200)
+
+                L1_Ground_Green_X = random.randint(1,400)
+                L1_Ground_Green_Y = random.randint(1,300)
+                L1_Ground_Green_W = random.randint(1,500)
+                L1_Ground_Green_H = random.randint(1,200)
+
+                L1_Ground_Blue_X = random.randint(1,400)
+                L1_Ground_Blue_Y = random.randint(1,300)
+                L1_Ground_Blue_W = random.randint(1,500)
+                L1_Ground_Blue_H = random.randint(1,200)
+
+
         
 
     #end of input array write
@@ -151,9 +183,20 @@ while running:
 #Game logic
   
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("#0230e4")
+    screen.fill(WHITE)
     pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
     ground = pygame.draw.rect(screen, ground_color, (ground_xpos, ground_ypos, ground_width, ground_height), 0, 0, 0) #ground
+    
+    #Red ground
+    L1_Ground_Red = pygame.draw.rect(screen, RED, (L1_Ground_Red_X-ball_true_x_pos+ball_xpos, L1_Ground_Red_Y, L1_Ground_Red_W, L1_Ground_Red_H), 0, 0, 0)
+    
+    #Green ground
+    L1_Ground_Green = pygame.draw.rect(screen, GREEN, (L1_Ground_Green_X-ball_true_x_pos+ball_xpos, L1_Ground_Green_Y, L1_Ground_Green_W, L1_Ground_Green_H), 0, 0, 0)
+    
+    #Blue ground
+    L1_Ground_Blue = pygame.draw.rect(screen, BLUE, (L1_Ground_Blue_X-ball_true_x_pos+ball_xpos, L1_Ground_Blue_Y, L1_Ground_Blue_W, L1_Ground_Blue_H), 0, 0, 0)
+
+
     button = pygame.draw.rect(screen, button_color, (button_xpos, button_ypos, button_width, button_height), 0, 0, 0)
     button_text = font.render(f"{button_text}", True, BLACK)
     screen.blit(button_text, [button_xpos, button_ypos])
@@ -165,6 +208,7 @@ while running:
     if ball_x_velocity != 0 or ball_y_velocity != 0:
         ball_xpos += ball_x_velocity
         ball_ypos += ball_y_velocity
+        ball_true_x_pos += ball_x_velocity
         if ball_xpos < 0:
             ball_xpos = 0
         elif ball_xpos >= screen_width-ball_width:
@@ -199,14 +243,28 @@ while running:
         else:
             ball_grounded = False
         
+        if ball_xpos > 0.65*screen_width:
+            offset=ball_xpos-0.65*screen_width
+            ball_xpos = 0.65*screen_width
+        elif ball_xpos < 0.35*screen_width:
+            offset=ball_xpos-0.35*screen_width
+            ball_xpos = 0.35*screen_width
+        else:
+            offset = 0        
+        
+        if ball_true_x_pos < 0:
+            ground_xpos = ground_width
+        else:
+            ground_xpos = L1_Ground_Red_X
+
         pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
     
-    xpostext = font.render(f"x-pos: {ball_xpos}", True, (0, 255, 0))
+    xpostext = font.render(f"x-pos: {ball_xpos}, True x pos: {ball_true_x_pos}", True, (0, 255, 0))
     ypostext = font.render(f"y-pos: {ball_ypos}", True, (0, 255, 0))
     #xlabelpos = [ball_xpos-20(((screen_width/2)-ball_xpos)/abs((screen_width/2)-ball_xpos)),ball_ypos-20(((screen_height/2)-ball_ypos)/abs((screen_height/2)-ball_ypos))]
     #ylabelpos = [300, 300]
     screen.blit(xpostext, [200, 0])
-    screen.blit(ypostext, [400, 0])
+    screen.blit(ypostext, [700, 0])
 
     pygame.display.update()
 
