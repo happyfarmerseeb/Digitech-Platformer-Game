@@ -47,7 +47,7 @@ ball_acceleration = 0
 offset = 0
 ball_true_x_pos = 200
 
-##Level 1##
+##Level 1, Ground Definitions##
 L1_Ground_Red_X = 50
 L1_Ground_Red_Y = 520
 L1_Ground_Red_W = 1080
@@ -64,12 +64,34 @@ L1_Ground_Blue_W = 1080
 L1_Ground_Blue_H = 200
 
 
-##Add ground definitions:##
-ground_xpos = 100
-ground_ypos = 520
-ground_width = L1_Ground_Red_W + L1_Ground_Green_W + L1_Ground_Blue_W
-ground_height = 200
-ground_color = BLACK
+#ground collision function:
+def collision_check(sprite_xpos, sprite_ypos, sprite_width, sprite_height, sprite_y_velocity, sprite_IV, sprite_grounded, obj_xpos, obj_ypos, obj_width, obj_height):
+    if sprite_xpos + sprite_width > obj_xpos and sprite_xpos + sprite_width < obj_xpos + sprite_width and sprite_ypos > obj_ypos - sprite_height and sprite_ypos < obj_ypos + obj_height:
+        sprite_xpos = obj_xpos - sprite_width
+        sprite_grounded = True
+        sprite_y_velocity = -sprite_IV
+
+    elif sprite_ypos + sprite_height > obj_ypos and sprite_ypos + sprite_height < obj_ypos + sprite_height and sprite_xpos > obj_xpos - sprite_width and sprite_xpos < obj_xpos + obj_width:
+        sprite_ypos = obj_ypos - sprite_height
+        sprite_grounded = True
+        sprite_y_velocity = -sprite_IV
+
+    elif sprite_xpos < obj_xpos + obj_width and sprite_xpos > obj_xpos + obj_width - sprite_width and sprite_ypos > obj_ypos - sprite_height and sprite_ypos < obj_ypos + obj_height:
+        sprite_xpos = obj_xpos + obj_width
+        sprite_grounded = True
+        sprite_y_velocity = -sprite_IV
+
+    elif sprite_ypos < obj_ypos + obj_height and sprite_ypos > obj_ypos + obj_height - sprite_height and sprite_xpos > obj_xpos - sprite_width and sprite_xpos < obj_xpos + obj_width:
+        sprite_ypos = obj_ypos + obj_height
+        sprite_grounded = True
+        sprite_y_velocity = -sprite_IV
+
+    else:
+        sprite_grounded = False
+
+    return (sprite_xpos, sprite_ypos, sprite_width, sprite_height, sprite_y_velocity, sprite_IV, sprite_grounded, obj_xpos, obj_ypos, obj_width, obj_height)
+
+
 
 
 #Window Settings
@@ -185,8 +207,7 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill(WHITE)
     pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
-    ground = pygame.draw.rect(screen, ground_color, (ground_xpos, ground_ypos, ground_width, ground_height), 0, 0, 0) #ground
-    
+
     #Red ground
     L1_Ground_Red = pygame.draw.rect(screen, RED, (L1_Ground_Red_X-ball_true_x_pos+ball_xpos, L1_Ground_Red_Y, L1_Ground_Red_W, L1_Ground_Red_H), 0, 0, 0)
     
@@ -219,29 +240,11 @@ while running:
         elif ball_ypos >= screen_height-ball_height:
             ball_ypos = screen_height-ball_height
 
-#ground collision logic:
-        if ball_xpos + ball_width > ground_xpos and ball_xpos + ball_width < ground_xpos + ball_width and ball_ypos > ground_ypos - ball_height and ball_ypos < ground_ypos + ground_height:
-            ball_xpos = ground_xpos - ball_width
-            ball_grounded = True
-            ball_y_velocity = -ball_IV
-
-        elif ball_ypos + ball_height > ground_ypos and ball_ypos + ball_height < ground_ypos + ball_height and ball_xpos > ground_xpos - ball_width and ball_xpos < ground_xpos + ground_width:
-            ball_ypos = ground_ypos - ball_height
-            ball_grounded = True
-            ball_y_velocity = -ball_IV
-
-        elif ball_xpos < ground_xpos + ground_width and ball_xpos > ground_xpos + ground_width - ball_width and ball_ypos > ground_ypos - ball_height and ball_ypos < ground_ypos + ground_height:
-            ball_xpos = ground_xpos + ground_width
-            ball_grounded = True
-            ball_y_velocity = -ball_IV
-
-        elif ball_ypos < ground_ypos + ground_height and ball_ypos > ground_ypos + ground_height - ball_height and ball_xpos > ground_xpos - ball_width and ball_xpos < ground_xpos + ground_width:
-            ball_ypos = ground_ypos + ground_height
-            ball_grounded = True
-            ball_y_velocity = -ball_IV
-
-        else:
-            ball_grounded = False
+    #checking object collision:
+        (ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Red_X, L1_Ground_Red_Y, L1_Ground_Red_W, L1_Ground_Red_H) = collision_check(ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Red_X, L1_Ground_Red_Y, L1_Ground_Red_W, L1_Ground_Red_H)
+        (ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Green_X, L1_Ground_Green_Y, L1_Ground_Green_W, L1_Ground_Green_H) = collision_check(ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Green_X, L1_Ground_Green_Y, L1_Ground_Green_W, L1_Ground_Green_H)
+        (ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Blue_X, L1_Ground_Blue_Y, L1_Ground_Blue_W, L1_Ground_Blue_H) = collision_check(ball_xpos, ball_ypos, ball_width, ball_height, ball_y_velocity, ball_IV, ball_grounded, L1_Ground_Blue_X, L1_Ground_Blue_Y, L1_Ground_Blue_W, L1_Ground_Blue_H)
+    #end of collision checks    
         
         if ball_xpos > 0.65*screen_width:
             offset=ball_xpos-0.65*screen_width
@@ -251,11 +254,8 @@ while running:
             ball_xpos = 0.35*screen_width
         else:
             offset = 0        
+    
         
-        if ball_true_x_pos < 0:
-            ground_xpos = ground_width
-        else:
-            ground_xpos = L1_Ground_Red_X
 
         pygame.draw.ellipse(screen, ball_color, (ball_xpos, ball_ypos, ball_width, ball_height))
     
