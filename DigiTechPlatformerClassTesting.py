@@ -21,6 +21,17 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 gravity = 0.42
 
+class Level:
+    def __init__(self):
+        self.objlist = []
+
+    def addobj(self, object):
+        self.objlist.append(object)
+
+    def modify(self):
+        for i in range(0,len(self.objlist)):
+            self.objlist[i].x -= ball.offset
+
 class Button:
     def __init__(self, x, y, w, h, colour, text):
         self.x = x
@@ -55,7 +66,6 @@ class Player:
         self.accel = accel #0
         self.offset = offset #0
         self.true_x = 200 #200
-
 
     def move(self):
         #input array read begin
@@ -123,16 +133,16 @@ class Player:
 
 ##Add Ground definitions:
 class Ground:
-    def __init__(self, x, y, w, h, colour):
+    def __init__(self, x, y, w, h, colour, level):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.colour = colour
+        level.addobj(self)
 
     def draw(self):
         pygame.draw.rect(screen, self.colour, (self.x, self.y, self.w, self.h), 0, 0, 0) #ground
-
 
     def collision_check(self, sprite):
         if sprite.x + sprite.w > self.x and sprite.x + sprite.w < self.x + sprite.w and sprite.y > self.y - sprite.h and sprite.y < self.y + self.h:
@@ -153,7 +163,8 @@ class Ground:
             sprite.y_vel = -sprite.IV
         else:
             sprite.grounded = False
-
+    
+    
 
 screen = pygame.display.set_mode((screen_width, screen_height)) #window dimensions (W, H)
 pygame.display.set_caption("[Insert Game Window Name]") #window title
@@ -161,9 +172,10 @@ clock = pygame.time.Clock() #clock
 running = True #status of game running
 
 #create object instances:
+level1 = Level()
 RandButton = Button(1000, 120, 150, 50, GREEN, "Speed")
 ball = Player(200, 200, 50, 50, (160, 0, 0), [False, False, False], [False, False, False], 10, 0, 0)
-redground = Ground(50, 520, 1080, 200, RED)
+redground = Ground(50, 520, 1080, 200, RED, level1)
 
 
 while running:
@@ -216,6 +228,7 @@ while running:
     
     redground.collision_check(ball)
     ball.move()
+    level1.modify()
     #reset canvas
     screen.fill(WHITE)
     #draw objects
