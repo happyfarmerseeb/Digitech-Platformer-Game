@@ -1,4 +1,5 @@
 #pygame class testing
+import math
 import random #imports random
 import pygame #imports pygame library
 print("Hello World") #prints "Hello World"
@@ -106,11 +107,16 @@ class Player:
             if self.x > 0.65*screen_width:
                 self.offset=self.x-0.65*screen_width
                 self.x = 0.65*screen_width
-            elif self.x < 0.35*screen_width:
-                self.offset=self.x-0.35*screen_width
-                self.x = 0.35*screen_width
+            elif self.x < 0.25*screen_width:
+                self.offset=self.x-0.25*screen_width
+                self.x = 0.25*screen_width
             else:
                 self.offset = 0      
+
+            if self.y < 0:
+                self.y = 0
+            elif self.y >= screen_height-self.h:
+                self.y = screen_height-self.h
 
         # draws ball:
         pygame.draw.ellipse(screen, self.colour, (self.x, self.y, self.w, self.h))
@@ -208,17 +214,21 @@ while running:
                 # L1_Ground_Blue_H = random.randint(1,200)
     
     
-    ball.move()
     redground.collision_check(ball)
+    ball.move()
     #reset canvas
     screen.fill(WHITE)
     #draw objects
     RandButton.draw()
     ball.draw()
     redground.draw()
+    xpostext = font.render(f"x-pos: {math.trunc(ball.x)}, True x pos: {math.trunc(ball.true_x)}", True, (0, 255, 0))
+    ypostext = font.render(f"y-pos: {math.trunc(ball.y)}", True, (0, 255, 0))
+    screen.blit(xpostext, [ball.x-100, ball.y-50])
+    screen.blit(ypostext, [ball.x, ball.y-100])
+    
     
     # RENDER YOUR GAME HERE
-
     pygame.display.update()
 
     clock.tick(50)  # limits FPS to 50
