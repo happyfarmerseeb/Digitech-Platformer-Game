@@ -8,8 +8,8 @@ print("Hello World") #prints "Hello World"
 pygame.init()
 
 #define some important values (default colours, screen width and screen height, etc.)#
-screen_width = 1280
-screen_height = 720
+screen_width = 1536
+screen_height = 864
 font = pygame.font.SysFont("Calibri", 25)
 Red_A_Val = 1
 Green_A_Val = 1
@@ -29,8 +29,12 @@ class Level:
         self.objlist.append(object)
 
     def modify(self):
+        ball.grounded = False
         for i in range(0,len(self.objlist)):
             self.objlist[i].x -= ball.offset
+            if ball.grounded == False:
+                self.objlist[i].collision_check(ball)
+            self.objlist[i].draw()
 
 class Button:
     def __init__(self, x, y, w, h, colour, text):
@@ -57,15 +61,15 @@ class Player:
         self.LastInputs = LastInputs #[False, False, False]
         self.Inputs = Inputs #[False, False, False]
         self.IV = 0 #0
-        self.EV = 0 #0
         self.airtime = 0 #0
         self.max_x_vel = max_x_vel #10
         self.x_vel = 0 #0
         self.y_vel = 0 #0
         self.grounded = False #False
+        self.jump_ready = False
         self.accel = accel #0
         self.offset = offset #0
-        self.true_x = 200 #200
+        self.true_x = x #200
 
     def move(self):
         #input array read begin
@@ -89,10 +93,11 @@ class Player:
 
         #dealing with jump inputs (Inputs[2] = True)
         if self.Inputs[2] == True:
-            if self.grounded == True:
-                self.IV = -15
+            if self.jump_ready == True:
+                self.IV = -15 #IV: Internal Velocity (How far the ball is trying to go)
                 self.airtime = 0
-            if self.grounded == False:
+                self.jump_ready = False
+            else:
                 if self.airtime >= 75:
                     self.Inputs[2] = False
                 self.airtime += 1
@@ -107,12 +112,11 @@ class Player:
         #calculate y velocity of ball
         self.y_vel = self.IV+(self.airtime*gravity)
 
-    def draw(self):
-        # updates position to display:
+            # updates position to display:
         if self.x_vel != 0 or self.y_vel != 0:
             self.x += self.x_vel
             self.y += self.y_vel
-            self.true_x += self.x_vel
+            self.true_x += self.offset
             
             if self.x > 0.65*screen_width:
                 self.offset=self.x-0.65*screen_width
@@ -127,7 +131,8 @@ class Player:
                 self.y = 0
             elif self.y >= screen_height-self.h:
                 self.y = screen_height-self.h
-
+            
+    def draw(self):
         # draws ball:
         pygame.draw.ellipse(screen, self.colour, (self.x, self.y, self.w, self.h))
 
@@ -145,22 +150,23 @@ class Ground:
         pygame.draw.rect(screen, self.colour, (self.x, self.y, self.w, self.h), 0, 0, 0) #ground
 
     def collision_check(self, sprite):
-        if sprite.x + sprite.w > self.x and sprite.x + sprite.w < self.x + sprite.w and sprite.y > self.y - sprite.h and sprite.y < self.y + self.h:
+        if sprite.x + sprite.w > self.x and sprite.x < self.x and sprite.y + sprite.h > self.y and sprite.y < self.y + self.h:
             sprite.x = self.x - sprite.w
+            sprite.y_vel = 0 #previously -sprite.IV
             sprite.grounded = True
-            sprite.y_vel = -sprite.IV
-        elif sprite.y + sprite.h > self.y and sprite.y + sprite.h < self.y + sprite.h and sprite.x > self.x - sprite.w and sprite.x < self.x + self.w:
+        elif sprite.y + sprite.h > self.y and sprite.y < self.y and sprite.x > self.x - sprite.w and sprite.x < self.x + self.w:
             sprite.y = self.y - sprite.h
+            sprite.y_vel = 0
             sprite.grounded = True
-            sprite.y_vel = -sprite.IV
+            sprite.jump_ready = True
         elif sprite.x < self.x + self.w and sprite.x > self.x + self.w - sprite.w and sprite.y > self.y - sprite.h and sprite.y < self.y + self.h:
             sprite.x = self.x + self.w
+            sprite.y_vel = 0
             sprite.grounded = True
-            sprite.y_vel = -sprite.IV
         elif sprite.y < self.y + self.h and sprite.y > self.y + self.h - sprite.h and sprite.x > self.x - sprite.w and sprite.x < self.x + self.w:
             sprite.y = self.y + self.h
+            sprite.y_vel = 0
             sprite.grounded = True
-            sprite.y_vel = -sprite.IV
         else:
             sprite.grounded = False
     
@@ -175,7 +181,15 @@ running = True #status of game running
 level1 = Level()
 RandButton = Button(1000, 120, 150, 50, GREEN, "Speed")
 ball = Player(200, 200, 50, 50, (160, 0, 0), [False, False, False], [False, False, False], 10, 0, 0)
-redground = Ground(50, 520, 1080, 200, RED, level1)
+redground = Ground(50, 664, 1080, 200, RED, level1)
+greenground = Ground(1130, 664, 1080, 200, GREEN, level1)
+blueground = Ground(2210, 664, 1080, 200, BLUE, level1)
+redplatform = Ground(300, 594, 380, 60, RED, level1)
+redplatform1 = Ground(700, 364, 180, 60, RED, level1)
+greenplatform = Ground(1350, 474, 140, 50, GREEN, level1)
+greenplatform1 = Ground(1850, 474, 280, 80, GREEN, level1)
+blueplatform = Ground(2500, 464, 310, 240, BLUE, level1)
+blueplatform1 = Ground(2950, 264, 170, 100, BLUE, level1)
 
 
 while running:
@@ -226,18 +240,20 @@ while running:
                 # L1_Ground_Blue_H = random.randint(1,200)
     
     
-    redground.collision_check(ball)
-    ball.move()
-    level1.modify()
     #reset canvas
     screen.fill(WHITE)
+    
+    #functions
+    ball.move()
+
     #draw objects
+    level1.modify()
     RandButton.draw()
     ball.draw()
-    redground.draw()
-    xpostext = font.render(f"x-pos: {math.trunc(ball.x)}, True x pos: {math.trunc(ball.true_x)}", True, (0, 255, 0))
+    
+    xpostext = font.render(f"X: {math.trunc(ball.x)}, True X: {math.trunc(ball.true_x)}, W: {ball.w}, H: {ball.h}, Last: {ball.LastInputs}, Current: {ball.Inputs}, IV: {ball.IV}, Air: {ball.airtime}, MaxVel: {ball.max_x_vel}, XV: {math.trunc(ball.x_vel)}, YV: {math.trunc(ball.y_vel)}, Grounded: {ball.grounded}, Jump: {ball.jump_ready}, Accel: {ball.accel}", True, (0, 255, 0))
     ypostext = font.render(f"y-pos: {math.trunc(ball.y)}", True, (0, 255, 0))
-    screen.blit(xpostext, [ball.x-100, ball.y-50])
+    screen.blit(xpostext, [0, 50])
     screen.blit(ypostext, [ball.x, ball.y-100])
     
     
