@@ -56,7 +56,7 @@ class Player:
         self.true_x = 200 #200
 
 
-    def Move(self):
+    def move(self):
         #input array read begin
         #dealing with x acceleration
         if self.Inputs[0] == True:
@@ -115,7 +115,38 @@ class Player:
         # draws ball:
         pygame.draw.ellipse(screen, self.colour, (self.x, self.y, self.w, self.h))
 
+##Add Ground definitions:
+class Ground:
+    def __init__(self, x, y, w, h, colour):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.colour = colour
 
+    def draw(self):
+        pygame.draw.rect(screen, self.colour, (self.x, self.y, self.w, self.h), 0, 0, 0) #ground
+
+
+    def collision_check(self, sprite):
+        if sprite.x + sprite.w > self.x and sprite.x + sprite.w < self.x + sprite.w and sprite.y > self.y - sprite.h and sprite.y < self.y + self.h:
+            sprite.x = self.x - sprite.w
+            sprite.grounded = True
+            sprite.y_vel = -sprite.IV
+        elif sprite.y + sprite.h > self.y and sprite.y + sprite.h < self.y + sprite.h and sprite.x > self.x - sprite.w and sprite.x < self.x + self.w:
+            sprite.y = self.y - sprite.h
+            sprite.grounded = True
+            sprite.y_vel = -sprite.IV
+        elif sprite.x < self.x + self.w and sprite.x > self.x + self.w - sprite.w and sprite.y > self.y - sprite.h and sprite.y < self.y + self.h:
+            sprite.x = self.x + self.w
+            sprite.grounded = True
+            sprite.y_vel = -sprite.IV
+        elif sprite.y < self.y + self.h and sprite.y > self.y + self.h - sprite.h and sprite.x > self.x - sprite.w and sprite.x < self.x + self.w:
+            sprite.y = self.y + self.h
+            sprite.grounded = True
+            sprite.y_vel = -sprite.IV
+        else:
+            sprite.grounded = False
 
 
 screen = pygame.display.set_mode((screen_width, screen_height)) #window dimensions (W, H)
@@ -126,6 +157,7 @@ running = True #status of game running
 #create object instances:
 RandButton = Button(1000, 120, 150, 50, GREEN, "Speed")
 ball = Player(200, 200, 50, 50, (160, 0, 0), [False, False, False], [False, False, False], 10, 0, 0)
+redground = Ground(50, 520, 1080, 200, RED)
 
 
 while running:
@@ -176,13 +208,14 @@ while running:
                 # L1_Ground_Blue_H = random.randint(1,200)
     
     
-    ball.Move()
-
+    ball.move()
+    redground.collision_check(ball)
     #reset canvas
     screen.fill(WHITE)
     #draw objects
     RandButton.draw()
     ball.draw()
+    redground.draw()
     
     # RENDER YOUR GAME HERE
 
