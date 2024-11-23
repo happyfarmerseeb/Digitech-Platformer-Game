@@ -400,10 +400,11 @@ while running:
         RandButton.draw()
         ball.draw()
         
-        xpostext = font.render(f"X: {math.trunc(ball.x)}, True X: {math.trunc(ball.true_x)}, W: {ball.w}, H: {ball.h}, Last: {ball.LastInputs}, Current: {ball.Inputs}, IV: {ball.IV}, Air: {ball.airtime}, MaxVel: {ball.max_x_vel}, XV: {math.trunc(ball.x_vel)}, YV: {math.trunc(ball.y_vel)}, Grounded: {ball.grounded}, Jump: {ball.jump_ready}, Accel: {ball.accel}", True, (0, 255, 0))
-        ypostext = font.render(f"y-pos: {math.trunc(ball.y)}", True, (0, 255, 0))
-        screen.blit(xpostext, [0, 50])
-        screen.blit(ypostext, [ball.x, ball.y-100])
+        #value display (for dev testing):
+        # xpostext = font.render(f"X: {math.trunc(ball.x)}, True X: {math.trunc(ball.true_x)}, W: {ball.w}, H: {ball.h}, Last: {ball.LastInputs}, Current: {ball.Inputs}, IV: {ball.IV}, Air: {ball.airtime}, MaxVel: {ball.max_x_vel}, XV: {math.trunc(ball.x_vel)}, YV: {math.trunc(ball.y_vel)}, Grounded: {ball.grounded}, Jump: {ball.jump_ready}, Accel: {ball.accel}", True, (0, 255, 0))
+        # ypostext = font.render(f"y-pos: {math.trunc(ball.y)}", True, (0, 255, 0))
+        # screen.blit(xpostext, [0, 50])
+        # screen.blit(ypostext, [ball.x, ball.y-100])
 
         InputL.draw()
         InputR.draw()
